@@ -1,0 +1,76 @@
+server:
+  port: 8081
+  
+eureka:
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    service-url:
+      defaultZone: http://localhost:8761/eureka
+      
+spring:
+  application:
+    name: OrderService
+
+
+resilience4j.circuitbreaker:
+  configs:
+    default:
+      slidingWindowType: COUNT_BASED
+      slidingWindowSize: 100
+      permittedNumberOfCallsInHalfOpenState: 10
+      waitDurationInOpenState: 10
+      failureRateThreshold: 60
+      registerHealthIndicator: true
+      
+     
+management:
+  endpoints:
+    web:
+      exposure:
+        include:
+        - "*"
+    
+  endpoint:
+    health:
+      show-details: always
+
+
+
+
+package demo.boot.web;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.client.RestTemplate;
+
+import demo.boot.model.Order;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+
+@RestController
+public class OrderController {
+
+@Autowired
+ RestTemplate restTemplate;
+ 
+@PostMapping
+@CircuitBreaker(name = "DiscountService", fallbackMethod = "defaultResonse")
+ public ResponseEntity<Order> createOrder(@RequestBody Order newOrder)
+ {
+	 Order order = restTemplate.postForObject("http://DISCOUNTSERVICE", newOrder, Order.class);
+	 
+	 return ResponseEntity.ok().header("status", "final discount").body(order);
+	 
+ }
+
+public ResponseEntity<Order> defaultResonse(Order newOrder, Exception ex) {
+   
+	newOrder.setDiscount(100);
+	
+    return ResponseEntity.ok().header("status", "default discount@fallaback").body(newOrder);
+}
+}
+
