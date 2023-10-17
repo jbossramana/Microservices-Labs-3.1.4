@@ -9,9 +9,9 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.scg</groupId>
-	<artifactId>Usecase2-Cloud-oauth-secured-service</artifactId>
+	<artifactId>Usecase2-cloud-oauth-gateway</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>Usecase2-Cloud-oauth-secured-service</name>
+	<name>Usecase2-cloud-oauth-gateway</name>
 	<description>Demo project for Spring Boot</description>
 
 	<properties>
