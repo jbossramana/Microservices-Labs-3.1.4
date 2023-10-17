@@ -39,7 +39,7 @@ public class WebController {
         return result;
     }
 
-    @GetMapping(value = "/tweets-non-blocking", produces = MediaType.APPLICATION_STREAM_JSON_VALUE)
+    @GetMapping(value = "/tweets-non-blocking",produces = "application/stream+json")
     public Flux<Tweet> getTweetsNonBlocking() {
        System.out.println("Starting NON-BLOCKING Controller!");
         Flux<Tweet> tweetFlux = WebClient.create()
