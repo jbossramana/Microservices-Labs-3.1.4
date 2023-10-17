@@ -8,7 +8,7 @@ endpoint will also be [subscribed] to the returned Flux object.
 
 
 Test the application
-============
+====================
 
 http://localhost:8080/tweets-blocking
 http://localhost:8080/tweets-non-blocking
@@ -18,7 +18,7 @@ Uncomment, .delayElements(Duration.ofSeconds(1))
 onceagin run http://localhost:8080/tweets-non-blocking
 
 Reactive Rest Controller:
-===============
+========================
 
 @GetMapping("/banking/account/{accountId}")
 public Mono<ResponseEntity<Account>> getAccountById(@PathVariable ("accountId") String accounId)
@@ -34,7 +34,7 @@ return repo.findAll().publishOn(Schedulers.parallel()).log().delayElements(Durat
 
 
 Reactive Spring Data repository :
-====================
+=================================
 
 @Repository
 public interface AccountRepository extends ReactiveMongoRepository<Account, String> {
@@ -44,7 +44,7 @@ public Mono<Void> deleteById(String Id);
 }
 
 Reactive Web Client:
-============
+====================
 WebClient client= WebClient.create("http://localhost:8080/")
 client.get().uri("/banking/stream/accounts")
 .accept(MediaType.TEXT_EVENT_STREAM)
@@ -52,6 +52,92 @@ client.get().uri("/banking/stream/accounts")
 .bodyToFlux(Account.class)
 .subscribe(System.out::println);
 }
+
+
+To get only the first 10 elements from the Flux, you can use the take() operator.
+.delayElements(Duration.ofSeconds(1))
+        .take(10)  // Add this line to take the first 10 elements
+
+To get items 5 to 2 from the Flux, you can use the skip() and take() operators in combination
+.delayElements(Duration.ofSeconds(1))
+        .skip(4)    // Skip the first 4 items
+        .take(4)    // Take the next 4 items
+
+
+The delayElements operator is used to introduce artificial delays between emitting elements in the Flux. In the context of your code, it's used to 
+simulate a delay between the elements retrieved from a remote service. This can be helpful for demonstration, testing, or simulating scenarios where 
+there might be some latency in data retrieval.
+
+Instead of using delayElements, we can write the below logic:
+
+
+@GetMapping(value = "/tweets-non-blocking", produces = MediaType.APPLICATION_STREAM_JSON_VALUE)
+public Flux<Tweet> getTweetsNonBlocking() {
+    System.out.println("Starting NON-BLOCKING Controller!");
+    Flux<Tweet> tweetFlux = WebClient.create()
+        .get()
+        .uri(getSlowServiceUri())
+        .retrieve()
+        .bodyToFlux(Tweet.class)
+        .flatMap(this::customFilterAndTransform) // Apply custom logic
+        .log("Tweets are retrieved : ");
+
+    tweetFlux.subscribe(tweet -> System.out.println(tweet.toString()));
+
+    System.out.println("Exiting NON-BLOCKING Controller!");
+    return tweetFlux;
+}
+
+private Mono<Tweet> customFilterAndTransform(Tweet tweet) {
+    // Add custom logic here to filter and transform tweets as needed
+    if (someCondition) {
+        return Mono.empty(); // Skip this tweet
+    } else {
+        // Modify the tweet as needed
+        tweet.setContent("Modified: " + tweet.getContent());
+        return Mono.just(tweet);
+    }
+}
+
+
+To achieve parallel processing in your code using Spring WebFlux, you can leverage the parallel operator and the flatMap operator with parallel processing. 
+This allows you to process elements concurrently. Here's how you can modify your code to perform parallel processing:
+
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
+
+@GetMapping(value = "/tweets-non-blocking", produces = MediaType.APPLICATION_STREAM_JSON_VALUE)
+public Flux<Tweet> getTweetsNonBlocking() {
+    System.out.println("Starting NON-BLOCKING Controller!");
+    Flux<Tweet> tweetFlux = WebClient.create()
+        .get()
+        .uri(getSlowServiceUri())
+        .retrieve()
+        .bodyToFlux(Tweet.class)
+        .parallel()  // Enable parallel processing
+        .runOn(Schedulers.parallel())  // Use the parallel scheduler
+        .flatMap(this::customFilterAndTransform) // Apply custom logic in parallel
+        .log("Tweets are retrieved : ")
+        .sequential();  // Convert back to sequential processing
+
+    tweetFlux.subscribe(tweet -> System.out.println(tweet.toString()));
+
+    System.out.println("Exiting NON-BLOCKING Controller!");
+    return tweetFlux;
+}
+
+private Mono<Tweet> customFilterAndTransform(Tweet tweet) {
+    // Add custom logic here to filter and transform tweets as needed
+    if (someCondition) {
+        return Mono.empty(); // Skip this tweet
+    } else {
+        // Modify the tweet as needed
+        tweet.setContent("Modified: " + tweet.getContent());
+        return Mono.just(tweet);
+    }
+}
+
 
 
 
