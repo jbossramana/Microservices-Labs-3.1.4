@@ -5,3 +5,5 @@ set SPRING_PROFILES_ACTIVE=default,hsqldb
 set CLOUD_FOUNDRY_CONFIG_PATH=C:\ELK-Zipkin-Uaa\uaa-tomcat\apache-tomcat-8.0.33\uaa
 
 startup.bat
+
+http://localhost:8090/uaa/token_keys
