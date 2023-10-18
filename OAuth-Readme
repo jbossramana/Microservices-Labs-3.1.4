@@ -1,0 +1,5 @@
+set JAVA_HOME=C:\ELK-Zipkin-Uaa\jdk1.8.0_231
+set PATH=C:\ELK-Zipkin-Uaa\jdk1.8.0_231\bin
+
+set SPRING_PROFILES_ACTIVE=default,hsqldb
+set CLOUD_FOUNDRY_CONFIG_PATH=C:\ELK-Zipkin-Uaa\uaa-tomcat\apache-tomcat-8.0.33\uaa
