@@ -20,7 +20,7 @@ post localhost:8082/inventory
 
 {
 "item":"books",
-"quantity":200
+"quantity":50
 }
 
 post  localhost:8080/order
@@ -38,8 +38,8 @@ Failure Scenario
 post  localhost:8080/order
 
 {
-"item":"computer",
-"quantity":10,
+"item":"laptops",
+"quantity":60,
 "amount":30000,
 "address":"chennai",
 "paymentMode":"credit card"
