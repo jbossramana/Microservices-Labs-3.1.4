@@ -1,3 +1,5 @@
+Run the below commands from kafka bin directory(C:\kafka_2.13-3.6.0\bin\windows)
+
 zookeeper start command:
 zookeeper-server-start.bat ..\..\config\zookeeper.properties
 
@@ -44,6 +46,11 @@ post  localhost:8080/order
 "address":"chennai",
 "paymentMode":"credit card"
 }
+
+
+To check the success/failure result, we need to access the database:
+http://localhost:8080/h2-console
+jdbc:h2:mem:ordersdb
 
 
 
